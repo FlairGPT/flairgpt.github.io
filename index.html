@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>FlairGPT: Repurposing LLMs for Interior Designs</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- <link rel="icon" href="favicon.ico"> -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/fontawesome.all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
+    <script defer src="js/fontawesome.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/synced_video_selector.js"></script>
+
+    <style>
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px 0;
+        }
+        
+        .pill {
+            width: 130px !important;
+            height: 130px !important; 
+            padding: 0 !important;
+            margin: 0 !important; 
+            box-sizing: border-box !important; 
+            transition: outline 0.2s ease !important, box-shadow 0.2s ease !important; 
+        }
+
+        .pill.scene-pill {
+            margin-bottom: 30px !important; 
+        }
+
+
+        
+        .pill .card-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 5px !important;
+        }
+    
+        .pill:hover {
+            outline: 3px solid rgba(0, 123, 255, 0.6) !important; 
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2) !important; 
+        }
+    
+        .pill.active {
+            outline: 3px solid #007bff !important; 
+        }
+    </style>
+    
+    
+    <style>
+            .video-title {
+        margin-bottom: 40px; /* Adjust the value as needed */
+    }
+
+    </style>
+
+<style>
+    .method-label {
+        text-align: center;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+</style>
+    
+
+<style>
+    .comparison-image {
+        width: 100%;
+        height: auto; 
+        object-fit: contain; 
+    }
+
+    .method-label {
+        text-align: center;
+        margin-top: 5px;
+        font-size: 14px;
+    }
+</style>
+
+<style>
+    .video-grid-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 60%;  
+        margin: 0 auto;  
+    }
+
+    .video-grid {
+        width: 100%;  
+        height: auto; 
+    }
+
+    .col-md-6 {
+        padding: 10px;
+    }
+</style>
+
+<style>
+    .overlay-text-box {
+    position: absolute;
+    bottom: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.8); /* White box with some transparency */
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+.overlay-text {
+    font-family: 'Handlee', cursive; /* Handwriting-style font */
+    color: black;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+</style>
+
+<style>
+    .prompt-box {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+}
+
+#scene-prompt-text {
+    font-family: 'Arial', sans-serif;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+</style>
+
+
+</head>
+
+<body style="padding: 5%; padding-top: min(15px, 5%); padding-bottom: min(5px, 5%); width: 100%">
+    <div class="container-lg text-center" style="max-width: 1500px; margin: auto;" id="main">
+        <header role="banner">
+            <!-- <div class="container" id="main"> -->
+            <br><br><br><br>
+            <div class="row">
+                <h2 class="col-md-12 text-center">
+                    <b>FlairGPT:</b> Repurposing LLMs for Interior Designs</br>
+                </h2>
+            </div>
+        </header>
+        <br>
+
+        <div class="row text-center">
+            <div class="col-md-3">
+            </div>
+            <div class="container-fluid text-center">
+                <ul class="list-inline" style="white-space: nowrap; margin:0px 0px 0px 0px;" >
+                    <li><a style="font-size: calc(min(3vw, 15px))">Gabrielle Littlefair<sup> 1</sup></a><!--don't add a linebreak here! it adds a space!-->
+                    </li>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="https://niladridutt.com/" target="_blank">Niladri Shekhar Dutt<sup> 1</sup></a><!--don't add a linebreak here! it adds a space!-->
+                    </li>
+                    <li><a style="font-size: calc(min(3vw, 15px))" href="http://www0.cs.ucl.ac.uk/staff/n.mitra/" target="_blank">Niloy J. Mitra<sup> 1, 2</sup></a></li>
+                </ul>
+            </div>
+            <div class="col-md-12 text-center" style="font-size: calc(min(3vw, 15px))">
+        ¹University College London&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;²Adobe Research&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div style="display: inline; font-family:verdana; font-size: calc(min(3vw, 15px))">
+
+            <br><br>
+            <!-- <i class="fa-brands fa-github"></i> Code </a> -->
+
+            <div class="row text-center">
+                <span class="link-block" style="padding-top: 10px; padding-bottom: 10px">
+                    <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 80px; font-size: 15px">
+                        <span class="icon">
+                            <i class="ai ai-arxiv"></i>
+                        </span>
+                        <span>arXiv</span>
+                    </a>
+                    <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 100px; font-size: 15px">
+                        <span class="icon">
+                            <i class="fa fa-file-pdf"></i>
+                        </span>
+                        <span>Paper</span>
+                    </a>
+                    <a href="" class="external-link button is-normal is-rounded is-dark"
+                        style="width: 140px; font-size: 15px">
+                        <span class="icon">
+                            <i class="fa-brands fa-github"></i>
+                        </span>
+                        <span>Coming soon</span>
+                    </a>
+                </span>
+            </div>
+        <span class="link-block">
+            <!-- <a href="./supplemental.pdf" target="_blank"
+               class="external-link button is-normal is-rounded is-dark">
+              <span class="icon">
+                  <i class="fas fa-file-pdf"></i>
+              </span>
+              <span>Supplemental PDF</span>
+            </a>
+          </span> -->
+
+        <br>
+
+        <main role="main">
+            <div class="col-md-8 offset-md-2">
+                <div id="single-video-compare">
+                    <div class="video-container container position-relative p-0">
+                        <video class="video" id="comparison-video" loop playsinline autoplay muted style="width: 70%;">
+                        </video>
+                        <div class="overlay-text-box">
+                            <p class="overlay-text" id="overlay-text">Writer's Office</p>
+                        </div>
+                        <div class="video-title-overlay" id="comp-label">Writer's Office</div>
+                    </div>
+            
+                    <div class="pill-row scene-pills" id="simple-pills" role="group" aria-relevant="additions text">
+                        <div class="pill scene-pill" data-value="writers_office">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Writer's Office</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="artist_bedroom">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Artist's Bedroom</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="boho_dining">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Boho Dining Room</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="home_gym">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Home Gym</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="vampire_bedroom">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Vampire Bedroom</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="living_room">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">4m x4m Living Room</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="sewing_room">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Sewing Room</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="traditional_living">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Traditional Living Room</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="wizard_workroom">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Wizard's Workroom</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="bedroom">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">4m x 5m Bedroom</div> 
+                        </div>
+                        <div class="pill scene-pill" data-value="ogre_kitchen">
+                            <canvas class="card-img"></canvas>
+                            <div class="video-title">Ogre's Kitchen</div> 
+                        </div>
+                    </div>
+                </div>
+            
+                <script>
+                    const videoContainer = document.querySelector("#single-video-compare");
+                    const videoElement = videoContainer.querySelector("#comparison-video");
+                    const titleOverlay = document.querySelector("#comp-label");
+                    const simpleScenePills = videoContainer.querySelectorAll(".scene-pill");
+            
+                    let activeScene = "writers_office";
+            
+                    simpleScenePills.forEach(pill => {
+                        pill.addEventListener('click', function () {
+                            activeScene = this.getAttribute("data-value");
+                            updateVideo();
+                        });
+                    });
+
+                    
+            
+                    const overlayTexts = {
+                        "writers_office": "An office for a bestelling writer in New York who likes to write Fantasy books.",
+                        "artist_bedroom": "A bedroom that is 5x5 for a young girl who likes to paint whilst looking out of her window.",
+                        "boho_dining": "A small green boho dining room.",
+                        "home_gym": "A small home gym.",
+                        "vampire_bedroom": "A bedroom for a vampire.",
+                        "living_room": "A living room that is 4m x 4m.",
+                        "sewing_room": "A sewing room.",
+                        "traditional_living": "A traditional living room.",
+                        "wizard_workroom": "A small workroom for a wizard.",
+                        "bedroom": "A bedroom that is 4m x 5m.",
+                        "ogre_kitchen": "A kitchen for an ogre."
+                    };
+
+                    function updateVideo() {
+                        videoElement.src = `videos/Results/${activeScene}/compressed.webm`;
+
+                        titleOverlay.textContent = document.querySelector(`.scene-pill[data-value="${activeScene}"] .video-title`).textContent;
+                        
+                        // Update the overlay text based on the active scene
+                        document.getElementById('overlay-text').textContent = overlayTexts[activeScene];
+                        
+                        simpleScenePills.forEach(pill => pill.classList.remove("active"));
+                        document.querySelector(`.scene-pill[data-value="${activeScene}"]`).classList.add("active");
+                    }
+
+            
+
+                    function generateThumbnails() {
+                        simpleScenePills.forEach(pill => {
+                            const canvas = pill.querySelector("canvas");
+                            const video = document.createElement("video");
+                            const scene = pill.getAttribute("data-value");
+            
+                            video.src = `videos/Results/${scene}/video.mp4`;
+                            video.muted = true;
+                            video.playsInline = true;
+            
+
+                            video.addEventListener("loadeddata", function () {
+                                // Seek to the first frame
+                                video.currentTime = 0.1;
+            
+
+                                video.addEventListener("seeked", function () {
+                                    const context = canvas.getContext("2d");
+                                    canvas.width = video.videoWidth;
+                                    canvas.height = video.videoHeight;
+                                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                });
+                            });
+                        });
+                    }
+            
+                    updateVideo();
+                    generateThumbnails();
+                </script>
+                <br><br><br>
+
+                <p>We present layouts generated FlairGPT across a variety of prompts. These range from traditional bedroom and living room designs to more specialized spaces,
+                    such as a sewing room, and stylized concepts like <i>"A small workroom for a wizard"</i>. FlairGPT also demonstrates its ability to meet
+                    specific client-driven functional and aesthetic requirements, such as
+                    <i>“A bedroom that is 5x5 for a young girl who likes to paint whilst
+                    looking out of her window"</i> or <i>"An office for a bestselling writer in
+                    New York who likes to write Fantasy books"</i>.
+                </p>
+                
+            </div>            
+            
+            
+            
+
+            <br><br><br>
+            
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3> Method overview </h3>
+                    <br>
+                    <image width=100% src="img/layout_pipeline.png"
+                        alt="A diagram explaining the method in broad strokes, like explained in the caption."></image>
+
+                        <br><br><br>
+
+                    <figcaption class="text-justify margin-5" style="text-align: left;">
+                        <p><b>Method overview</b>. FlairGPT begins by taking the user's design request as a text prompt and querying an LLM to extract key room
+                        parameters, such as dimensions and the location and number of windows, doors, and sockets. Next, following a designer's workflow, the LLM
+                        generates an ordered list of zones, specifying the functional purpose of different areas within the room. Based on these zones, a prioritized list
+                        of required objects is generated, complete with descriptions and dimensions. These objects serve as the nodes of a layout graph, with inter-
+                        and intra-object constraints—defined by the LLM—forming the edges. The natural language constraints provided by the LLM are translated
+                        into algebraic forms by querying the LLM to map these constraints to a predefined library of cost functions. Once these cost functions are
+                        established, the placement and orientation of objects are progressively optimized according to their hierarchical importance. Finally, objects
+                        are retrieved based on their descriptions and incorporated into the scene. <i>We use GPT-4o in all our experiments.</i></p>
+
+                        <br>
+
+                        <image width=100% src="img/legend_teaser_vis.png"
+                        alt="A diagram explaining the method in broad strokes, like explained in the caption."></image>
+                        <br><br>
+                        <p><b>Generated layouts by FlairGPT</b>. We present varied layouts designed by FlairGPT for three distinct prompts (from left to right)-
+                            “4m x 5m bedroom", “small workroom for a wizard”, and “bedroom for a vampire”. Alongside each layout, we include descriptions of
+                            selected objects provided by the LLM, which closely align with the user’s design brief. Notably, FlairGPT makes creative and context-
+                            appropriate object choices, such as a scroll holder and a crystal ball for a wizard’s workroom, and a coffin in place of a traditional bed in the
+                            case of a vampire’s bedroom, reflecting the thematic style of the input prompts.</p>
+                </div>
+            </div>
+
+            <br><br>
+
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3>
+                        Comparison with other methods
+                    </h3>
+                    <br>
+
+                    <p>Comparison of layouts generated by FlairGPT against baseline methods, highlighting differences in object arrangement, spatial organization, and
+                        overall design quality. We convert room plans generated by LayoutGPT to complete layouts for easier visualization by giving it the same object attributes and room style as ours. We see that layouts generated by LayoutGPT suffer from functional defects whcih lead to blockage of pathways (particularly near the doors). Holodeck is limited in stylization and does not offer optimal spatial organization leading to wastage of floor space.</p>
+            
+                    <br>
+                    
+            
+                    <div id="single-image-compare">
+                        <div class="row m-2">
+                            <div class="col-md-10">
+                                <ul class="nav nav-pills justify-content-center" role="navigation" id="scene-switcher">
+                                    <li class="nav-item">
+                                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true"
+                                            style="width: 110px"><strong>Scene:</strong></a>
+                                    </li>
+                                    <!-- Scene switcher pills will be dynamically generated here -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div id="scene-prompt" class="prompt-box">
+                            <i><p id="scene-prompt-text">Select a scene.</p></i>
+                        </div>
+            
+                        <!-- Image Comparison Grid -->
+                        <div class="image-container container position-relative p-0">
+                            <div class="row image-row" id="comparison-grid">
+                                <!-- Image containers will be dynamically added based on the selected scene -->
+                            </div>
+                        </div>
+                    </div>
+            
+                    <script>
+                        // Define two sets of scenes
+                        const scenesGroup1 = ["bedroom 1", "bedroom 2", "living room"];
+                        const scenesGroup2 = ["writer's office", "sewing room", "vampire bedroom", "boho dining", "wizard workroom", "artist's bedroom"];
+                    
+                        // Scene prompt texts
+                        const scenePrompts = {
+                            "bedroom 1": "A bedroom that is 3.225m x 4.5m.",
+                            "bedroom 2": "A bedroom that is 3m x 4m bedroom.",
+                            "living room": "A living room that is 8m x 4m.",
+                            "writer's office": "An office for a bestselling writer in New York who likes to write Fantasy books.",
+                            "sewing room": "A sewing room.",
+                            "vampire bedroom": "A bedroom for a vampire.",
+                            "boho dining": "A small green boho dining room.",
+                            "wizard workroom": "A small workroom for a wizard.",
+                            "artist's bedroom": "A bedroom that is 5x5 for a young girl who likes to paint whilst looking out of her window."
+                        };
+                    
+                        // Image keys (file names) remain the same
+                        const methodsGroup1 = ["LGPT", "holodeck", "ATISS2", "chatgpt", "FLAIR"];
+                        const methodsGroup2 = ["holodeck", "FLAIR"];
+                    
+                        // Titles/captions for display
+                        const methodTitlesGroup1 = ["LayoutGPT", "Holodeck", "ATISS", "ChatGPT", "FlairGPT"];
+                        const methodTitlesGroup2 = ["Holodeck", "FlairGPT"];
+                    
+                        // Combine both scene groups
+                        const allScenes = [...scenesGroup1, ...scenesGroup2];
+                    
+                        let activeCompareScene = allScenes[0];
+                    
+                        const sceneSwitcher = document.getElementById("scene-switcher");
+                        const compareDiv = document.querySelector("#single-image-compare");
+                        const comparisonGrid = document.getElementById("comparison-grid");
+                        const scenePromptText = document.getElementById('scene-prompt-text'); // Prompt text element
+                    
+                        // Generate scene switcher pills dynamically
+                        allScenes.forEach(scene => {
+                            const scenePill = document.createElement('li');
+                            scenePill.classList.add('nav-item', 'method-pill');
+                            scenePill.dataset.value = scene;
+                            scenePill.innerHTML = `<a class="nav-link">${scene.charAt(0).toUpperCase() + scene.slice(1)}</a>`;
+                            sceneSwitcher.appendChild(scenePill);
+                        });
+                    
+                        const methodPills = compareDiv.querySelectorAll('.method-pill');
+                        methodPills.forEach(pill => {
+                            pill.addEventListener('click', function () {
+                                activeCompareScene = this.getAttribute("data-value");
+                                updateImages();
+                            });
+                        });
+                    
+                        // Update images and the text prompt dynamically based on the selected scene
+                        function updateImages() {
+                            // Clear the existing comparison grid
+                            comparisonGrid.innerHTML = '';
+                    
+                            // Get the appropriate methods and titles based on the selected scene group
+                            let methods, methodTitles, columnClass;
+                            if (scenesGroup1.includes(activeCompareScene)) {
+                                methods = methodsGroup1; // Use image keys (file names) for the first group
+                                methodTitles = methodTitlesGroup1; // Use titles for display
+                                columnClass = 'col-md-4'; // Each image takes up 1/3 of the row
+                            } else {
+                                methods = methodsGroup2; // Use image keys (file names) for the second group
+                                methodTitles = methodTitlesGroup2; // Use titles for display
+                                columnClass = 'col-md-6'; // Each image takes up 1/2 of the row
+                            }
+                    
+                            // Update the scene prompt
+                            scenePromptText.textContent = scenePrompts[activeCompareScene] || "No prompt available for this scene.";
+                    
+                            // Dynamically create image elements for each method
+                            methods.forEach((method, index) => {
+                                const col = document.createElement('div');
+                                col.classList.add(columnClass); // Set the column class dynamically
+                                const img = document.createElement('img');
+                                img.classList.add('comparison-image');
+                                img.src = `img/comparison/${activeCompareScene}/${method}.png`; // Use the image key (file name)
+                                img.alt = `${methodTitles[index]} Method`; // Set the alt text using the title
+                                const label = document.createElement('div');
+                                label.classList.add('method-label');
+                                label.innerText = `${methodTitles[index]}`; // Display the title instead of the image key
+                    
+                                col.appendChild(img);
+                                col.appendChild(label);
+                                comparisonGrid.appendChild(col);
+                            });
+                        }
+                    
+                        window.addEventListener('resize', () => {
+                            // Recalculate image sizes on window resize
+                            const imageElements = compareDiv.querySelectorAll(".comparison-image");
+                            imageElements.forEach(img => {
+                                img.style.height = 'auto';
+                                img.style.width = '100%'; // Let the image adjust based on its container
+                            });
+                        });
+                    
+                        // Initial load
+                        updateImages();
+                    </script>
+                    
+                    <br><br>
+                    
+                </div>
+                
+            </div>
+
+
+            <br>
+
+            <div class="video-grid-wrapper">
+                <div class="row">
+                    <h3>
+                        Diversity
+                    </h3>
+                    <br><br><br>
+                    <p>FlairGPT generates diverse scenes for the same input prompt&mdash; “<i>A 5m x 3m home office”</i>, producing a wide range of
+                        layouts driven by variations in the selection of objects and style
+                        (guided by the LLM), and placement of windows, doors, and sockets. These elements significantly influence the arrangement of objects during our optimization phase, resulting in diverse and dynamic room configurations.</p>
+                    <center><div class="col-md-8">
+                        <video class="video-grid" controls autoplay loop muted>
+                            <source src="videos/diversity/output.webm" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div></center>
+                    <!-- <div class="col-md-6">
+                        <video class="video-grid" controls autoplay loop muted>
+                            <source src="videos/diversity/video (2).mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            
+                <div class="row">
+                    <div class="col-md-6">
+                        <video class="video-grid" controls autoplay loop muted>
+                            <source src="videos/diversity/video (3).mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="col-md-6">
+                        <video class="video-grid" controls autoplay loop muted>
+                            <source src="videos/diversity/video (4).mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div> -->
+            </div>
+
+            
+
+
+            <br>
+            <br>
+            
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3> Quantitative Comparison</h3>
+                    <br>
+                    <image width=100% src="img/quant.png"
+                        alt="Quantitative Comparison."></image>
+
+                        <br><br><br>
+
+                    <figcaption class="text-justify margin-5" style="text-align: left;">
+                        <p>We compare FlairGPT with both closed-universe and
+                            open-universe LLM-based layout generation methods—LayoutGPT [FZF*24] and Holodeck [YSW*23], respectively. The comparison is based on the three metrics outlined
+                            in subsection 5.1 of our paper. FlairGPT significantly outperforms both methods across all metrics.</p>
+                </div>
+            </div>
+
+            <br><br>
+            <div class="row">
+
+
+                <div class="col-md-8 offset-md-2">
+                    <h3> Statistics for Experiments</h3>
+                    <br>
+                    <image width=100% src="img/stats.png"
+                        alt="Quantitative Comparison."></image>
+
+                        <br><br><br>
+
+                    <figcaption class="text-justify margin-5" style="text-align: left;">
+                        <p>Statistics for our experiments including: the number of
+                            primary (P), secondary (S), and tertiary (T) objects per scene; the
+                            number of constraints before cleaning, after cleaning, and after
+                            translation (function calls); the number of errors including Language errors, 
+                            Cleaning errors, Translation errors, and Optimization errors; and the time (minutes) for the Language and Translation phase combined, 
+                            the Optimization phase, and the total time to
+                            generate each layout.</p>
+                </div>
+            </div>
+            <!-- <br><br><br><br><br> -->
+            <br>
+
+
+        </main>
+
+        <div class="col-md-8 offset-md-2 text-start">
+            <h4>
+                Acknowledgements
+            </h4>
+
+            <p class="text-justify" style="text-align: left;">
+                We thank Rishabh Kabra, Romy Williamson, and Tobias Ritschel for their comments and suggestions. NM was supported by Marie Skłodowska-Curie grant agreement No.~956585, gifts from Adobe, and UCL AI Centre.                <br><br><br>
+            </p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-5 center text-start">
+                <label style="display: inline" for="bibtex">
+                    <h4 style="text-align: center">BibTeX </h4>
+                </label>
+                <textarea id="bibtex" class="form-control" readonly>
+
+                    </textarea>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-8">
+                <video class="w-100 h-100" style="max-width:200px" src="videos/teaser/wizard_cat.mp4" muted loop autoplay playsinline>An animated illustrated cat paws at an
+                    image. It turns into a 3D cat head!</video>
+            </div>
+        </div>
+
+
+    </main>
+    </div>
+</body>
+
+</html>
