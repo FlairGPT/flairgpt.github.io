@@ -302,20 +302,12 @@
                     const videoElement = videoContainer.querySelector("#comparison-video");
                     const titleOverlay = document.querySelector("#comp-label");
                     const simpleScenePills = videoContainer.querySelectorAll(".scene-pill");
-            
+                
                     let activeScene = "writers_office";
-            
-                    simpleScenePills.forEach(pill => {
-                        pill.addEventListener('click', function () {
-                            activeScene = this.getAttribute("data-value");
-                            updateVideo();
-                        });
-                    });
-
-                    
-            
+                
+                    // Overlay text for each scene
                     const overlayTexts = {
-                        "writers_office": "An office for a bestelling writer in New York who likes to write Fantasy books.",
+                        "writers_office": "An office for a bestselling writer in New York who likes to write Fantasy books.",
                         "artist_bedroom": "A bedroom that is 5x5 for a young girl who likes to paint whilst looking out of her window.",
                         "boho_dining": "A small green boho dining room.",
                         "home_gym": "A small home gym.",
@@ -327,37 +319,36 @@
                         "bedroom": "A bedroom that is 4m x 5m.",
                         "ogre_kitchen": "A kitchen for an ogre."
                     };
-
+                
+                    // Function to update the main video player and overlay text
                     function updateVideo() {
+                        // Dynamically load the video source based on the selected pill
                         videoElement.src = `videos/Results/${activeScene}/compressed.webm`;
-
+                
+                        // Update the overlay text
                         titleOverlay.textContent = document.querySelector(`.scene-pill[data-value="${activeScene}"] .video-title`).textContent;
-                        
-                        // Update the overlay text based on the active scene
                         document.getElementById('overlay-text').textContent = overlayTexts[activeScene];
-                        
+                
+                        // Update active pill style
                         simpleScenePills.forEach(pill => pill.classList.remove("active"));
                         document.querySelector(`.scene-pill[data-value="${activeScene}"]`).classList.add("active");
                     }
-
-            
-
+                
+                    // Function to generate thumbnails only when the page loads
                     function generateThumbnails() {
                         simpleScenePills.forEach(pill => {
                             const canvas = pill.querySelector("canvas");
-                            const video = document.createElement("video");
                             const scene = pill.getAttribute("data-value");
-            
+                            const video = document.createElement("video");
+                
                             video.src = `videos/Results/${scene}/compressed.webm`;
                             video.muted = true;
                             video.playsInline = true;
-            
-
+                
                             video.addEventListener("loadeddata", function () {
                                 // Seek to the first frame
                                 video.currentTime = 0.1;
-            
-
+                
                                 video.addEventListener("seeked", function () {
                                     const context = canvas.getContext("2d");
                                     canvas.width = video.videoWidth;
@@ -367,10 +358,22 @@
                             });
                         });
                     }
-            
-                    updateVideo();
+                
+                    // Attach click event listeners to pills
+                    simpleScenePills.forEach(pill => {
+                        pill.addEventListener('click', function () {
+                            activeScene = this.getAttribute("data-value");
+                            updateVideo(); // Load the selected video dynamically
+                        });
+                    });
+                
+                    // Initial thumbnail generation
                     generateThumbnails();
+                
+                    // Set the initial video
+                    updateVideo();
                 </script>
+                
                 <br><br><br>
 
                 <p>We present layouts generated FlairGPT across a variety of prompts. These range from traditional bedroom and living room designs to more specialized spaces,
